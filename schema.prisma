@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guest {
+  id        Int      @id @default(autoincrement())
+  name      String
+  mobile    String
+  tableId   Int?
+  points    Int      @default(0)
+  createdAt DateTime @default(now())
+  uploads   Upload[]
+  orders    Order[]
+  loyaltyTransactions LoyaltyTransaction[]
+}
+
+model Upload {
+  id         Int     @id @default(autoincrement())
+  guest      Guest   @relation(fields:[guestId], references:[id])
+  guestId    Int
+  filePath   String?
+  instagramUrl String?
+  approved   Boolean @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model MenuCategory {
+  id    Int @id @default(autoincrement())
+  name  String
+  items MenuItem[]
+}
+
+model MenuItem {
+  id          Int @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  image       String?
+  category    MenuCategory @relation(fields:[categoryId], references:[id])
+  categoryId  Int
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id        Int @id @default(autoincrement())
+  guest     Guest @relation(fields:[guestId], references:[id])
+  guestId   Int
+  status    String
+  createdAt DateTime @default(now())
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+  order Order @relation(fields:[orderId], references:[id])
+  orderId Int
+  menuItem MenuItem @relation(fields:[menuItemId], references:[id])
+  menuItemId Int
+  quantity Int
+  price Float
+}
+
+model LoyaltyTransaction {
+  id Int @id @default(autoincrement())
+  guest Guest @relation(fields:[guestId], references:[id])
+  guestId Int
+  points Int
+  reason String
+  createdAt DateTime @default(now())
+}
+
+model Table {
+  id Int @id
+  name String
+}
